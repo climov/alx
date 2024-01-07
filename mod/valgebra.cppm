@@ -161,14 +161,14 @@ export template <concepts::Arithmetic Rep1, concepts::Arithmetic Rep2>
 auto operator+(const Vec2<Rep1>& v1, const Vec2<Rep2>& v2)
 {
     using Ret = std::common_type_t<Rep1, Rep2>;
-    return Vec2<Ret> { static_cast<Ret>(v1.x()) + static_cast<Ret>(v2.x()), static_cast<Ret>(v1.y()) + static_cast<Ret>(v2.y()) };
+    return Vec2<Ret> {{ static_cast<Ret>(v1.x()) + static_cast<Ret>(v2.x()), static_cast<Ret>(v1.y()) + static_cast<Ret>(v2.y()) }};
 }
 
 export template <concepts::Arithmetic Rep1, concepts::Arithmetic Rep2>
 auto operator-(const Vec2<Rep1>& v1, const Vec2<Rep2>& v2)
 {
     using Ret = std::common_type_t<Rep1, Rep2>;
-    return Vec2<Ret> { static_cast<Ret>(v1.x()) - static_cast<Ret>(v2.x()), static_cast<Ret>(v1.y()) - static_cast<Ret>(v2.y()) };
+    return Vec2<Ret> {{ static_cast<Ret>(v1.x()) - static_cast<Ret>(v2.x()), static_cast<Ret>(v1.y()) - static_cast<Ret>(v2.y()) }};
 }
 
 export template <concepts::Arithmetic Rep1, concepts::Arithmetic Rep2>
@@ -176,7 +176,7 @@ auto operator*(const Vec2<Rep1> v, const Rep2 scalar)
 {
     using Ret = std::common_type_t<Rep1, Rep2>;
     const Ret s = static_cast<Ret>(scalar);
-    return Vec2<Ret> { static_cast<Ret>(v.x()) * s, static_cast<Ret>(v.y()) * s };
+    return Vec2<Ret> {{ static_cast<Ret>(v.x()) * s, static_cast<Ret>(v.y()) * s }};
 }
 
 export template <concepts::Arithmetic Rep1, concepts::Arithmetic Rep2>
@@ -184,7 +184,7 @@ auto operator*(const Rep1 scalar, const Vec2<Rep2> v)
 {
     using Ret = std::common_type_t<Rep1, Rep2>;
     const Ret s = static_cast<Ret>(scalar);
-    return Vec2<Ret> { s * static_cast<Ret>(v.x()), s * static_cast<Ret>(v.y()) };
+    return Vec2<Ret> {{ s * static_cast<Ret>(v.x()), s * static_cast<Ret>(v.y()) }};
 }
 
 export template <concepts::Arithmetic Rep1, concepts::Arithmetic Rep2>
@@ -192,7 +192,7 @@ auto operator/(const Vec2<Rep1> v, const Rep2 scalar)
 {
     using Ret = std::common_type_t<Rep1, Rep2>;
     const Ret s = static_cast<Ret>(scalar);
-    return Vec2<Ret> { static_cast<Ret>(v.x()) / s, static_cast<Ret>(v.y()) / s };
+    return Vec2<Ret> {{ static_cast<Ret>(v.x()) / s, static_cast<Ret>(v.y()) / s }};
 }
 
 export template <concepts::HasSquareRoot Rep>
@@ -231,7 +231,7 @@ constexpr Vec2<Rep> Vec2<Rep>::rotated(const concepts::Angle auto& angle) const 
 {
     const auto c = cos(angle);
     const auto s = sin(angle);
-    return {c * x() - s * y(), s * x() + c * y()};
+    return {{c * x() - s * y(), s * x() + c * y()}};
 }
 template <typename Rep>
 trig::RadF Vec2<Rep>::angle() const requires concepts::Arithmetic<Rep>
@@ -247,18 +247,18 @@ Rep Vec2<Rep>::slope() const requires concepts::Arithmetic<Rep>
 template <typename Rep>
 Vec2<Rep> Vec2<Rep>::unitFromAngle(const concepts::Angle auto& angle) requires concepts::Arithmetic<Rep>
 {
-    return {trig::cos(angle), trig::sin(angle)};
+    return {{trig::cos(angle), trig::sin(angle)}};
 }
 template <typename Rep>
 Vec2<Rep> Vec2<Rep>::fromPolar(const concepts::Angle auto& angle, const Rep length) requires concepts::Arithmetic<Rep>
 {
-    return {length * trig::cos(angle), length * trig::sin(angle)};
+    return {{length * trig::cos(angle), length * trig::sin(angle)}};
 }
 
 export template <typename T, typename T1>
 Vec2<T> cast(const Vec2<T1> v)
 {
-    return {static_cast<T>(v.x()), static_cast<T>(v.y())};
+    return {{static_cast<T>(v.x()), static_cast<T>(v.y())}};
 }
 
 //! dot product

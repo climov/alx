@@ -25,6 +25,7 @@ struct Angle
     constexpr /*explicit*/ operator Other() const;
 
     //! Arithmetic assignment operators
+    constexpr Angle& operator +=(const Angle other) { value += other.value; return *this; }
     constexpr Angle& operator +=(const concepts::Angle auto other) { value += static_cast<Angle>(other).value; return *this; }
     constexpr Angle& operator -=(const concepts::Angle auto other) { value -= static_cast<Angle>(other).value; return *this; }
     constexpr Angle& operator *=(const Rep factor) { value *= factor; return *this; }
@@ -49,17 +50,92 @@ struct Angle
     //!     * the signed reduced angle as the angle between -Straight inclusiv and +Straight exclusive that is congruent with the original
 
     //! Change the angle to its reduced equivalent and return a reference
-    constexpr Angle& reduce() requires std::is_floating_point_v<Rep_>;
-    constexpr Angle& reduce() requires std::is_integral_v<Rep_>;
+    constexpr Angle& reduce() requires std::is_floating_point_v<Rep_>
+    {
+        using std::fmod;
+        value = fmod(value, Unit::fullCircle);
+        if (value < 0) {
+            value += Unit::fullCircle;
+        }
+        return *this;
+    }
+
+    constexpr Angle& reduce() requires std::is_integral_v<Rep_>
+    {
+        value %= Unit::fullCircle;
+        if (value < 0) {
+            value += Unit::fullCircle;
+        }
+        return *this;
+    }
+
     //! Change the angle to its signed reduced equivalent and return a reference
-    constexpr Angle& signedReduce() requires std::is_floating_point_v<Rep_>;
-    constexpr Angle& signedReduce() requires std::is_integral_v<Rep_> && std::is_signed_v<Rep_>;
+    constexpr Angle& signedReduce() requires std::is_floating_point_v<Rep_>
+    {
+        using std::fmod;
+        value = fmod(value, Unit::fullCircle);
+        if (value >= Unit::fullCircle / 2) {
+            value -= Unit::fullCircle;
+        } else if (value < Unit::fullCircle / 2) {
+            value += Unit::fullCircle;
+        }
+        return *this;
+    }
+
+    constexpr Angle& signedReduce() requires std::is_integral_v<Rep_> && std::is_signed_v<Rep_>
+    {
+        value %= Unit::fullCircle;
+        if (value >= Unit::fullCircle / 2) {
+            value -= Unit::fullCircle;
+        } else if (value < Unit::fullCircle / 2) {
+            value += Unit::fullCircle;
+        }
+        return *this;
+    }
+
     //! Returns the reduced angle
-    constexpr Angle reduced() const requires std::is_floating_point_v<Rep_>;
-    constexpr Angle reduced() const requires std::is_integral_v<Rep_>;
+    constexpr Angle reduced() const requires std::is_floating_point_v<Rep_>
+    {
+        using std::fmod;
+        Rep result = fmod(value, Unit::fullCircle);
+        if (result < 0) {
+            result += Unit::fullCircle;
+        }
+        return {result};
+    }
+
+    constexpr Angle reduced() const requires std::is_integral_v<Rep_>
+    {
+        Rep result = value % Unit::fullCircle;
+        if (result < 0) {
+            result += Unit::fullCircle;
+        }
+        return {result};
+    }
+
     //! Returns the signed reduced angle
-    constexpr Angle signedReduced() const requires std::is_floating_point_v<Rep_>;
-    constexpr Angle signedReduced() const requires std::is_integral_v<Rep_> && std::is_signed_v<Rep_>;
+    constexpr Angle signedReduced() const requires std::is_floating_point_v<Rep_>
+    {
+        using std::fmod;
+        Rep result = fmod(value, Unit::fullCircle);
+        if (result >= Unit::fullCircle / 2) {
+            result -= Unit::fullCircle;
+        } else if (result < Unit::fullCircle / 2) {
+            result += Unit::fullCircle;
+        }
+        return {result};
+    }
+
+    constexpr Angle signedReduced() const requires std::is_integral_v<Rep_> && std::is_signed_v<Rep_>
+    {
+        Rep result = value % Unit::fullCircle;
+        if (result >= Unit::fullCircle / 2) {
+            result -= Unit::fullCircle;
+        } else if (result < Unit::fullCircle / 2) {
+            result += Unit::fullCircle;
+        }
+        return {result};
+    }
 };
 
 namespace impl {
@@ -102,92 +178,6 @@ constexpr /*explicit*/ Angle<Rep, Unit, Ratio>::operator Other() const
     using divRatio = std::ratio_divide<Ratio, typename Other::Ratio>;
     static constexpr auto f = Other::Unit::fullCircle / Unit::fullCircle * divRatio::num / divRatio::den;
     return {static_cast<typename Other::Rep>(value * f)};
-}
-
-template <concepts::Arithmetic Rep, concepts::AngleUnit<Rep> Unit, concepts::Ratio Ratio>
-constexpr Angle<Rep, Unit, Ratio>& Angle<Rep, Unit, Ratio>::reduce() requires std::is_floating_point_v<Rep>
-{
-    using std::fmod;
-    value = fmod(value, Unit::fullCircle);
-    if (value < 0) {
-        value += Unit::fullCircle;
-    }
-    return *this;
-}
-template <concepts::Arithmetic Rep, concepts::AngleUnit<Rep> Unit, concepts::Ratio Ratio>
-constexpr Angle<Rep, Unit, Ratio>& Angle<Rep, Unit, Ratio>::signedReduce() requires std::is_floating_point_v<Rep>
-{
-    using std::fmod;
-    value = fmod(value, Unit::fullCircle);
-    if (value >= Unit::fullCircle / 2) {
-        value -= Unit::fullCircle;
-    } else if (value < Unit::fullCircle / 2) {
-        value += Unit::fullCircle;
-    }
-    return *this;
-}
-template <concepts::Arithmetic Rep, concepts::AngleUnit<Rep> Unit, concepts::Ratio Ratio>
-constexpr Angle<Rep, Unit, Ratio> Angle<Rep, Unit, Ratio>::reduced() const requires std::is_floating_point_v<Rep>
-{
-    using std::fmod;
-    Rep result = fmod(value, Unit::fullCircle);
-    if (result < 0) {
-        result += Unit::fullCircle;
-    }
-    return {result};
-}
-template <concepts::Arithmetic Rep, concepts::AngleUnit<Rep> Unit, concepts::Ratio Ratio>
-constexpr Angle<Rep, Unit, Ratio> Angle<Rep, Unit, Ratio>::signedReduced() const requires std::is_floating_point_v<Rep>
-{
-    using std::fmod;
-    Rep result = fmod(value, Unit::fullCircle);
-    if (result >= Unit::fullCircle / 2) {
-        result -= Unit::fullCircle;
-    } else if (result < Unit::fullCircle / 2) {
-        result += Unit::fullCircle;
-    }
-    return {result};
-}
-
-template <concepts::Arithmetic Rep, concepts::AngleUnit<Rep> Unit, concepts::Ratio Ratio>
-constexpr Angle<Rep, Unit, Ratio>& Angle<Rep, Unit, Ratio>::reduce() requires std::is_integral_v<Rep>
-{
-    value %= Unit::fullCircle;
-    if (value < 0) {
-        value += Unit::fullCircle;
-    }
-    return *this;
-}
-template <concepts::Arithmetic Rep, concepts::AngleUnit<Rep> Unit, concepts::Ratio Ratio>
-constexpr Angle<Rep, Unit, Ratio>& Angle<Rep, Unit, Ratio>::signedReduce() requires std::is_integral_v<Rep> && std::is_signed_v<Rep>
-{
-    value %= Unit::fullCircle;
-    if (value >= Unit::fullCircle / 2) {
-        value -= Unit::fullCircle;
-    } else if (value < Unit::fullCircle / 2) {
-        value += Unit::fullCircle;
-    }
-    return *this;
-}
-template <concepts::Arithmetic Rep, concepts::AngleUnit<Rep> Unit, concepts::Ratio Ratio>
-constexpr Angle<Rep, Unit, Ratio> Angle<Rep, Unit, Ratio>::reduced() const requires std::is_integral_v<Rep>
-{
-    Rep result = value % Unit::fullCircle;
-    if (result < 0) {
-        result += Unit::fullCircle;
-    }
-    return {result};
-}
-template <concepts::Arithmetic Rep, concepts::AngleUnit<Rep> Unit, concepts::Ratio Ratio>
-constexpr Angle<Rep, Unit, Ratio> Angle<Rep, Unit, Ratio>::signedReduced() const requires std::is_integral_v<Rep> && std::is_signed_v<Rep>
-{
-    Rep result = value % Unit::fullCircle;
-    if (result >= Unit::fullCircle / 2) {
-        result -= Unit::fullCircle;
-    } else if (result < Unit::fullCircle / 2) {
-        result += Unit::fullCircle;
-    }
-    return {result};
 }
 
 //! Cast between angles

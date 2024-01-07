@@ -35,6 +35,8 @@ if(WIN32)
         -wd4710 -wd4711
         -wd4738
         -wd4582 -wd4365
+        -wd4686
+        -wd4746
     )
 else()
     target_compile_options(alx PRIVATE
