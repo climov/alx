@@ -44,8 +44,14 @@ struct Vec2 : public std::array<Rep, 2>
     //! Returns an unit vector with the given angle
     [[nodiscard]] static Vec2 unitFromAngle(const concepts::Angle auto& angle) requires concepts::Arithmetic<Rep>;
     //! Returns an vector with the given angle and length
-    [[nodiscard]] static Vec2 fromPolar(const concepts::Angle auto& angle, const Rep length) requires concepts::Arithmetic<Rep>;
+    [[nodiscard]] static Vec2 fromPolar(const concepts::Angle auto& angle, Rep length) requires concepts::Arithmetic<Rep>;
+
+    //template <typename Rep1>
+    //Vec2<Rep1> cast() const noexcept { return {static_cast<Rep1>((*this)[0]), static_cast<Rep1>((*this)[1])}; }
 };
+
+template <typename Rep>
+Vec2(Rep x, Rep y) -> Vec2<Rep>;
 
 export using Vec2f = Vec2<float>;
 export using Vec2i = Vec2<int>;
